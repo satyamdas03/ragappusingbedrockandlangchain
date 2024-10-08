@@ -6,18 +6,18 @@ import streamlit as st
 
 ## We will be using Titan Embeddings Model To generate Embedding
 
-from langchain.embeddings import BedrockEmbeddings
-from langchain.llms.bedrock import Bedrock
+from langchain_community.embeddings import BedrockEmbeddings
+from langchain_community.llms import Bedrock
 
 ## Data Ingestion
 
 import numpy as np
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyPDFDirectoryLoader
 
 # Vector Embedding And Vector Store
 
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 
 ## LLm Models
 from langchain.prompts import PromptTemplate
