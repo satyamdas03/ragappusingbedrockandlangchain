@@ -33,6 +33,9 @@ def data_ingestion():
     loader=PyPDFDirectoryLoader("data")
     documents=loader.load()
 
+    # Log the number of documents loaded
+    st.write(f"Loaded {len(documents)} documents.")
+
     # - in our testing Character split works better with this PDF data set
     text_splitter=RecursiveCharacterTextSplitter(chunk_size=10000,
                                                  chunk_overlap=1000)
@@ -43,11 +46,16 @@ def data_ingestion():
 ## Vector Embedding and vector store
 
 def get_vector_store(docs):
-    vectorstore_faiss=FAISS.from_documents(
-        docs,
-        bedrock_embeddings
-    )
-    vectorstore_faiss.save_local("faiss_index")
+    try:
+        vectorstore_faiss = FAISS.from_documents(
+            docs,
+            bedrock_embeddings
+        )
+        vectorstore_faiss.save_local("faiss_index")
+    except ValueError as e:
+        st.error(f"Embedding error: {e}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
 
 def get_claude_llm():
     ##create the Anthropic Model
@@ -56,10 +64,10 @@ def get_claude_llm():
     
     return llm
 
-def get_llama2_llm():
-    ##create the Anthropic Model
-    llm=Bedrock(model_id="meta.llama2-70b-chat-v1",client=bedrock,
-                model_kwargs={'max_gen_len':512})
+def get_llama3_llm():
+    ## create the Llama 3 Model
+    llm = Bedrock(model_id="meta.llama3-70b-instruct", client=bedrock,
+                  model_kwargs={'max_gen_len': 512})
     
     return llm
 
@@ -120,14 +128,14 @@ def main():
             st.write(get_response_llm(llm,faiss_index,user_question))
             st.success("Done")
 
-    if st.button("Llama2 Output"):
+    if st.button("Llama3 Output"):
         with st.spinner("Processing..."):
             faiss_index = FAISS.load_local("faiss_index", bedrock_embeddings)
-            llm=get_llama2_llm()
+            llm = get_llama3_llm()  # Updated to use Llama 3
             
-            #faiss_index = get_vector_store(docs)
-            st.write(get_response_llm(llm,faiss_index,user_question))
+            st.write(get_response_llm(llm, faiss_index, user_question))
             st.success("Done")
+
 
 if __name__ == "__main__":
     main()
